@@ -26,6 +26,15 @@ public class ExpressionTest {
 		}	
 	}
 	
+	@Test
+	public void testNegate ( ) {
+		try {
+			Expression dpicks = new Expression("p");
+			assertTrue(dpicks.negate().equals(new Expression("~p"))); // this fails
+		}
+		catch (IllegalLineException e) {
+		}
+	}
 	
 	
 	@Test
@@ -43,6 +52,19 @@ public class ExpressionTest {
 		try {
 			Expression exp1 = new Expression("(((p=>q)=>q)=>((q=>p)=>p))");
 			printTree(exp1, 0, "Root");
+		} catch (IllegalLineException e) {
+			
+		}
+	}
+	@Test
+	public void testEquals() {
+		try {
+			Expression exp1 = new Expression("(p=>q)");
+			Expression exp2 = new Expression("(p=>q)");
+			Expression exp3 = new Expression("(((p=>q)=>q)=>((q=>p)=>p))");
+			Expression exp4 = new Expression("(((p=>q)=>q)=>((q=>p)=>p))");
+			assertTrue(exp1.equals(exp2));
+			assertTrue(exp3.equals(exp4));
 		} catch (IllegalLineException e) {
 			
 		}
