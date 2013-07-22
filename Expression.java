@@ -4,7 +4,7 @@ public class Expression {
 
 	private static final List<Character> operators = Arrays.asList('&', '|', '=');
 
-	private char root;
+	private Character root;
 	private Expression left;
 	private Expression right;
 
@@ -14,12 +14,12 @@ public class Expression {
 
 		//Handle empty expression.
 		if (s.length() == 0) {
-			throw new IllegalLineException("Empty strings are invalid.");
+			throw new IllegalLineException("Not enough characters to form a valid expression.");
 		}
 
 		//Handle single character expression.
 		if (s.length() == 1) {
-			if (Character.isLowerCase(s.charAt(0))) {
+			if (Character.isLowerCase(s.charAt(0))) {	
 			root = s.charAt(0);
 			return;
 			}
@@ -39,7 +39,6 @@ public class Expression {
 
 		//Check for proper parentheses.
 		if (s.charAt(0) != '(' || s.charAt(s.length() - 1) != ')') {
-			System.out.println(s);
 			throw new IllegalLineException("Not properly parenthesized.");
 		}
 
@@ -72,7 +71,7 @@ public class Expression {
 						root = '=';
 						left = new Expression(s.substring(0, i));
 						right = new Expression(s.substring(i+2, s.length()));
-						break;
+						return;
 
 					case '&': case '|':
 						if (i == 0 || i == s.length()){
@@ -82,14 +81,12 @@ public class Expression {
 						root = s.charAt(i);
 						left = new Expression(s.substring(0, i));
 						right = new Expression(s.substring(i + 1, s.length()));
-						break;
+						return;
 					}	
 				}
 
-
-			
-
 		}
+		throw new IllegalLineException("No valid operators.");
 
 	}
 
@@ -104,5 +101,27 @@ public class Expression {
 
 	public Expression getRight() {
 		return right;
+	}
+	
+	public boolean equals (Expression exp) {
+		if (isLeaf() && exp.isLeaf()) {
+			return root.equals(exp.getRoot());
+		}
+		else {
+			if (!root.equals(exp.getRoot())) {
+				return false;
+			}
+			if (!left.equals(exp.getLeft()) || !right.equals(exp.getRight())) {
+				return false;
+			}
+			return true;
+		}
+	}
+	
+	public boolean isLeaf ( ) {
+		if ((left == null) && (right == null)) {
+			return true;
+		}
+		return false;
 	}
 }
