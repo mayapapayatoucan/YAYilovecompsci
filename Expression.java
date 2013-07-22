@@ -11,7 +11,6 @@ public class Expression {
 	public Expression (String s) throws IllegalLineException {
 
 		int nest = 0;
-
 		//Handle empty expression.
 		if (s.length() == 0) {
 			throw new IllegalLineException("Not enough characters to form a valid expression.");
@@ -89,6 +88,12 @@ public class Expression {
 		throw new IllegalLineException("No valid operators.");
 
 	}
+	
+	public Expression (char myRoot, Expression myLeft, Expression myRight) {
+		root = myRoot;
+		left = myLeft;
+		right = myRight;
+	}
 
 	public char getRoot() {
 
@@ -101,6 +106,16 @@ public class Expression {
 
 	public Expression getRight() {
 		return right;
+	}
+	
+	public Expression negate ( ) {
+		if (root == '~') {
+			return right;
+		}
+		Expression temp = this;
+		root = '~';
+		right = temp;
+		return this;
 	}
 	
 	public boolean equals (Expression exp) {
