@@ -72,7 +72,7 @@ public class Expression {
 						root = '=';
 						left = new Expression(s.substring(0, i));
 						right = new Expression(s.substring(i+2, s.length()));
-						break;
+						return;
 
 					case '&': case '|':
 						if (i == 0 || i == s.length()){
