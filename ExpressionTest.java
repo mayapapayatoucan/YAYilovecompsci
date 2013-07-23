@@ -1,47 +1,94 @@
-public class ExpressionTest {
-	
-	public static void main (String[] args) {
+import static org.junit.Assert.*;
 
-		Expression expressingmyself;
-		Expression stillexpressing;
+import org.junit.Test;
+
+
+public class ExpressionTest {
+
+
+	public boolean testhelper(String S) {
 
 		try {
-
-	expressingmyself = new Expression("a");
-		stillexpressing = new Expression("((p&q)=>q)");
-		Expression youdontknowme = new Expression("~((p|q)&p)");
-	//Expression expressingmyself2 = new Expression("(&(p|q))");
-	//	Expression mybloodyexpression = new Expression("(p=q)");
-		Expression hashtagamandabynes = new Expression("A");
-		Expression hashtagjokesaboutmyd = new Expression("(pq)");
-		Expression dpicks = new Expression("(&=>|)");
-		Expression theresalwaysmoneyinthebananastand = new Expression("");
-		Expression wut = new Expression("(p=>))");
-		Expression leanback = new Expression("((p=>q)");
-		Expression winstoned = new Expression("(p&)=>q()");
-		Expression quillin = new Expression("(p#q)");
-		Expression spacedout = new Expression("(p => q)");
-		Expression luvsawoman = new Expression("");
-/*
-		System.out.println("EM2 Root: " + expressingmyself2.getRoot());
-		System.out.println(expressingmyself.getRoot());
-		System.out.println(stillexpressing.getRoot());
-		System.out.println("Should be &: " + stillexpressing.getLeft().getRoot());
-		System.out.println("Should be p: " + stillexpressing.getLeft().getLeft().getRoot());
-		System.out.println("Should be ~: " + youdontknowme.getRoot());
-		System.out.println("Should be &: " + youdontknowme.getRight().getRoot());
-		System.out.println("Should be |: " + youdontknowme.getRight().getLeft().getRoot());
-		System.out.println("Should be p: " + youdontknowme.getRight().getRight().getRoot());
-*/
-	}	catch (IllegalLineException e) {
+			new Expression(S);	
+			return false;
+		}
+		catch (IllegalLineException e) {
 			System.out.println(e.getMessage());
+			return true;
+		}	
 	}
-
-
-
-
-
-
+	
+	public void printTree (Expression exp, int depth, String direction) {
+		if (exp != null) {
+			printTree(exp.getLeft(), depth + 1, "left");
+			System.out.println("root: " + exp.getRoot() + " depth: " + depth + " direction: " + direction);
+			printTree(exp.getRight(), depth + 1, "right");
+		}	
+	}
+	
+	@Test
+	public void testNegate ( ) {
+		try {
+			Expression dpicks = new Expression("p");
+			assertTrue(dpicks.negate().equals(new Expression("~p"))); // this fails
+		}
+		catch (IllegalLineException e) {
+		}
+	}
+	
+	
+	@Test
+	public void testValid () {
+		assertFalse(testhelper("(p=>q)"));
+		assertFalse(testhelper("~p"));
+		assertFalse(testhelper("~~p"));
+		assertFalse(testhelper("~~~p"));
+		assertFalse(testhelper("~~~~~~~~~~~~~~~~~~~~~~~~~~p"));
+		assertFalse(testhelper("(p&q)"));
+		assertFalse(testhelper("(p|q)"));
+		assertFalse(testhelper("(((p=>q)=>q)=>((q=>p)=>p))"));
+		assertFalse(testhelper("((p&(p=>q))=>q)"));		// our goal
+		assertFalse(testhelper("(~p&q)"));
+		try {
+			Expression exp1 = new Expression("(((p=>q)=>q)=>((q=>p)=>p))");
+			printTree(exp1, 0, "Root");
+		} catch (IllegalLineException e) {
+			
+		}
+	}
+	@Test
+	public void testEquals() {
+		try {
+			Expression exp1 = new Expression("(p=>q)");
+			Expression exp2 = new Expression("(p=>q)");
+			Expression exp3 = new Expression("(((p=>q)=>q)=>((q=>p)=>p))");
+			Expression exp4 = new Expression("(((p=>q)=>q)=>((q=>p)=>p))");
+			assertTrue(exp1.equals(exp2));
+			assertTrue(exp3.equals(exp4));
+		} catch (IllegalLineException e) {
+			
+		}
+	}
+	
+	@Test
+	public void testExceptions () {
+		//commented ones are the ones which tests fail
+		assertTrue(testhelper("A"));
+		assertTrue(testhelper("(&=>|)"));
+		assertTrue(testhelper("(pq)"));
+		assertTrue(testhelper("(p=>q))"));
+		assertTrue(testhelper("(p=>)"));
+		assertTrue(testhelper("((p=>q)"));
+		assertTrue(testhelper("(p&)=>q()"));
+		assertTrue(testhelper("(p#q)"));
+		assertTrue(testhelper("(p => q)"));
+		assertTrue(testhelper(""));
+		assertTrue(testhelper("(p&q&r)"));
+		assertTrue(testhelper("(p|q|r)"));
+		assertTrue(testhelper("(p=>q)()(~q=>p)"));
+		
+		
+		
 	}
 
 }
