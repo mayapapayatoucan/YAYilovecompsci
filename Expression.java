@@ -122,6 +122,11 @@ public class Expression {
 		if (isLeaf() && exp.isLeaf()) {
 			return root.equals(exp.getRoot());
 		}
+
+		if (isLeaf() || exp.isLeaf()) {
+			return false;
+		}
+
 		else {
 			if (!root.equals(exp.getRoot())) {
 				return false;
