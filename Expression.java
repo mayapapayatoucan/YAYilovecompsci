@@ -108,7 +108,7 @@ public class Expression {
 		return right;
 	}
 	
-	public Expression negate ( ) {  // this doesn't work
+	public Expression negate ( ) {
 /*	if (root == '~') {
 			return right;
 		} */
