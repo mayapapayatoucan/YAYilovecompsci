@@ -112,10 +112,11 @@ public class Expression {
 		if (root == '~') {
 			return right;
 		}
-		Expression temp = this;
-		root = '~';
-		right = temp;
-		return this;
+
+
+		Expression toNegate = new Expression(root, left, right);
+		return new Expression('~', null, toNegate);
+		
 	}
 	
 	public boolean equals (Expression exp) {
