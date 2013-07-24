@@ -26,16 +26,7 @@ public class ExpressionTest {
 		}	
 	}
 	
-	@Test
-	public void testNegate ( ) {
-		try {
-			Expression dpicks = new Expression("p");
-			assertTrue(dpicks.negate().equals(new Expression("~p"))); // this fails
-		}
-		catch (IllegalLineException e) {
-		}
-	}
-	
+	// need to test negate
 	
 	@Test
 	public void testValid () {
@@ -51,7 +42,7 @@ public class ExpressionTest {
 		assertFalse(testhelper("(~p&q)"));
 		try {
 			Expression exp1 = new Expression("(((p=>q)=>q)=>((q=>p)=>p))");
-			printTree(exp1, 0, "Root");
+			Expression.print(exp1, "testValid Tree");
 		} catch (IllegalLineException e) {
 			
 		}
@@ -63,8 +54,14 @@ public class ExpressionTest {
 			Expression exp2 = new Expression("(p=>q)");
 			Expression exp3 = new Expression("(((p=>q)=>q)=>((q=>p)=>p))");
 			Expression exp4 = new Expression("(((p=>q)=>q)=>((q=>p)=>p))");
+			Expression exp5 = new Expression("p");
+			Expression exp6 = new Expression("p");
+			Expression exp7 = new Expression("~p");
+			Expression exp8 = new Expression("~p");
 			assertTrue(exp1.equals(exp2));
 			assertTrue(exp3.equals(exp4));
+			assertTrue(exp5.equals(exp6));
+			assertTrue(exp7.equals(exp8));
 		} catch (IllegalLineException e) {
 			
 		}
@@ -85,9 +82,25 @@ public class ExpressionTest {
 		assertTrue(testhelper(""));
 		assertTrue(testhelper("(p&q&r)"));
 		assertTrue(testhelper("(p|q|r)"));
-		assertTrue(testhelper("(p=>q)()(~q=>p)"));
-		
-		
+		assertTrue(testhelper("(p=>q)()(~q=>p)"));		
+	}
+	
+	@Test
+	public void testNegate ( ) {
+		try {
+			Expression exp1 = new Expression("p");
+			Expression exp2 = new Expression("~p");
+			exp1 = exp1.negate();
+			assertTrue(exp1.equals(exp2));
+			exp1 = new Expression("(p&q)");
+			exp2 = new Expression("~(p&q)");
+			exp1 = exp1.negate();
+			assertTrue(exp1.equals(exp2));
+			exp1 = exp1.negate();
+			assertFalse(exp1.equals(new Expression("(p&q)")));
+			assertTrue(exp1.equals(new Expression("~~(p&q)")));
+		} catch (IllegalLineException e) {
+		}
 		
 	}
 
