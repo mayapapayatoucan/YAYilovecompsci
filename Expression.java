@@ -108,41 +108,64 @@ public class Expression {
 		return right;
 	}
 	
-	public Expression negate ( ) {  // this doesn't work
-		if (root == '~') {
+	public Expression negate ( ) {
+/*	if (root == '~') {
 			return right;
-		}
-
-
-		Expression toNegate = new Expression(root, left, right);
-		return new Expression('~', null, toNegate);
-		
+} */
+		Expression temp = new Expression(root, left, right);
+		return new Expression('~', null, temp);
 	}
 	
 	public boolean equals (Expression exp) {
-		if (isLeaf() && exp.isLeaf()) {
-			return root.equals(exp.getRoot());
-		}
+		return equalsHelper(this, exp);
+	}
+	
+	public static boolean equalsHelper(Expression exp1, Expression exp2) {
 
-		if (isLeaf() || exp.isLeaf()) {
+		if (exp1 == null && exp2 == null) {
+			return true;
+		}
+		
+		if (exp1 == null || exp2 == null) {
 			return false;
 		}
 
-		else {
-			if (!root.equals(exp.getRoot())) {
-				return false;
-			}
-			if (!left.equals(exp.getLeft()) || !right.equals(exp.getRight())) {
-				return false;
-			}
-			return true;
+		if (exp1.getRoot() != exp2.getRoot()) {  // char equals
+			return false;
 		}
+		if (!equalsHelper(exp1.getLeft(), exp2.getLeft()) || !equalsHelper(exp1.getRight(), exp2.getRight())) {
+			return false;
+		}
+		return true;
 	}
+
 	
 	public boolean isLeaf ( ) {
 		if ((left == null) && (right == null)) {
 			return true;
 		}
 		return false;
+	}
+	
+	public static void print (Expression e, String description) {
+		System.out.println(description + ":");
+		printHelper(e, 0);
+	}
+	
+	private static final String indent1 = "    ";
+	
+	private static void printHelper (Expression e, int indent) {
+		if (e != null) {
+			printHelper(e.right, indent+1);
+			println (e.root, indent);
+			printHelper(e.left, indent+1);
+		}
+	}
+			
+	private static void println (Object obj, int indent) {
+	    for (int k=0; k<indent; k++) {
+	        System.out.print (indent1);
+	    }
+	    System.out.println (obj);
 	}
 }
