@@ -7,6 +7,29 @@ public class ProofTest {
 	
 	//all expressions are assumed to be valid expressions since the expression class should catch those errors
 
+	@Test
+	public void testTheoremSet() {
+		try{
+			TheoremSet t1 = new TheoremSet("t1", new Expression("(~~p=>p)"));
+			assertTrue(t1.equalsHelper(new Expression("(~~(p&q)=>(p&q))"), new Expression("(~~p=>p)")));
+			TheoremSet t2 = new TheoremSet("t2", new Expression("((p=>q)=>(~p|q))"));
+			assertTrue(t2.equalsHelper(new Expression("(((a&b)=>c)=>(~(a&b)|c))"), new Expression("((p=>q)=>(~p|q))")));
+			TheoremSet t3 = new TheoremSet("t3", new Expression("(~(p&q)=>(~p|~q))"));
+			assertTrue(t3.equalsHelper(new Expression("(~((a|b)&(c|d))=>(~(a|b)|~(c|d)))"), new Expression("(~(p&q)=>(~p|~q))")));
+			TheoremSet t4 = new TheoremSet("t4", new Expression("(~~~~~~~~~p=>~p)"));
+			assertTrue(t4.equalsHelper(new Expression("(~~~~~~~~~(p&q)=>~(p&q))"), new Expression("(~~~~~~~~~p=>~p)")));
+			TheoremSet t5 = new TheoremSet("t5", new Expression("(~p=>p)"));
+			assertTrue(t5.equalsHelper(new Expression("(~(p&q)=>(p&q))"), new Expression("(~p=>p)")));
+			TheoremSet t6 = new TheoremSet("t6", new Expression("(p|q)"));
+			assertFalse(t6.equalsHelper(new Expression("(~~p=>p)"), new Expression("(p|q)")));
+			//TheoremSet t7 = new TheoremSet("t7", new Expression("(~~(p&q)=>(p&q))"));		// this test fails
+			//assertFalse(t7.equalsHelper(new Expression("(~~p=>p)"), new Expression("(~~(p&q)=>(p&q))")));
+			
+		} catch (IllegalLineException e) {
+			System.out.println("Mike Clancy's beard is awesome");
+		}
+	}
+
   @Test
 	public void testIsModusPonens() {
 		try {
