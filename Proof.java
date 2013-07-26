@@ -3,34 +3,47 @@ import java.util.*;
 public class Proof {
 	private HashMap<LineNumber, Expression> lines;
 	private LineNumber base;
-	private LineNumber currentLine;
+	private int localLine;
 	private Expression toBeProved;
 	private Proof subProof;
 	private TheoremSet theorems;
+	private boolean proved;
 
   	public Proof (TheoremSet theorems) {
 	  lines = new HashMap<LineNumber, Expression>();
-	  currentLine = new LineNumber();
+	  localLine = 1;
 	  this.theorems = theorems;
+	  proved = false;
 	}
+
 	public Proof (TheoremSet theorems, LineNumber base) {
 		this(theorems);
 		this.base = base;
 	}
 
+	//Returns current line number in context of global proof.
+	public LineNumber globalLine() {
+		return LineNumber.concat(base, localLine);
+	}
 
-	public LineNumber nextLineNumber ( ) {
-		if (subProof == null) {
-			return new LineNumber(currentLine.getHead() + 1);
+	//Searches for deepest subproof, and requests global line number.
+	public LineNumber nextLineNumber () {
+		
+		Proof p = this;
+		while (p.subProof != null) {
+			p = p.subProof;
 		}
-		return new LineNumber(currentLine.getHead(), subProof.nextLineNumber());
+		return p.globalLine();
 	}
 
 	public void extendProof (String x) throws IllegalLineException, IllegalInferenceException {
-		currentLine = nextLineNumber();
+		
 		//Feed lines to subproof if currently working on subproof.
 		if (subProof != null) {
 			subProof.extendProof(x);
+			if (subProof.isComplete()) {
+				subProof = null;
+			}
 		}
 		
 		//Otherwise...
@@ -43,13 +56,12 @@ public class Proof {
 			if (currline[0].equals("show")) {
 			
 				if (toBeProved != null) {
-					subProof = new Proof(theorems, currentLine);
+					subProof = new Proof(theorems, globalLine());
 					subProof.toBeProved = new Expression(currline[1]);
 
 					//If subproof is completed...
 					if (subProof.isComplete()) {
-						currentLine.setRest(null);
-						lines.put(currentLine, subProof.toBeProved());
+						lines.put(globalLine(), subProof.toBeProved());
 						subProof = null;
 					}
 				}
@@ -60,9 +72,7 @@ public class Proof {
 
 			else if (currline[0].equals("ic")) {
 
-				
 				LineNumber ref = new LineNumber(currline[1]);
-
 
 				Expression expAtRef = null;
 
@@ -82,9 +92,9 @@ public class Proof {
 					throw new IllegalInferenceException("Not a valid use of implication construction.");
 				}
 
-				lines.put(ref, toProve);
-				//for debugging
-				System.out.println("Lines size: " + lines.size());
+				lines.put(base, toProve);
+				proved = true;
+
 
 			}
 					
@@ -95,10 +105,8 @@ public class Proof {
 
 			
 				if ((new Expression(currline[1])).equals(toBeProved.getLeft())) {
-						//for debugging
-					System.out.println("put " + currentLine.getHead());
 
-					lines.put(LineNumber.concat(base, currentLine), new Expression(currline[1]));
+					lines.put(globalLine(), new Expression(currline[1]));
 				}
 			} 
 			
@@ -109,7 +117,9 @@ public class Proof {
 				}	
 			}
 */
+			localLine++;
 		}
+
 		
 	}
 
@@ -118,12 +128,7 @@ public class Proof {
 	}
 
 	public boolean isComplete ( ) {
-		for (Expression e : lines.values()) {
-			if (e.equals(toBeProved)) {
-				return true;
-			}
-		}
-		return false;
+		return proved;
 	}
 	
 	public static boolean isMP (Expression imp, Expression given, Expression proven) {
