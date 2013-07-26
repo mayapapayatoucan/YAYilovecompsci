@@ -10,26 +10,28 @@ public class ProofTest {
 	@Test
 	public void testTheoremSet() {
 		try{
-			TheoremSet t1 = new TheoremSet("t1", new Expression("(~~p=>p)"));
-			assertTrue(t1.equalsHelper(new Expression("(~~(p&q)=>(p&q))"), new Expression("(~~p=>p)")));
-			TheoremSet t2 = new TheoremSet("t2", new Expression("((p=>q)=>(~p|q))"));
-			assertTrue(t2.equalsHelper(new Expression("(((a&b)=>c)=>(~(a&b)|c))"), new Expression("((p=>q)=>(~p|q))")));
-			TheoremSet t3 = new TheoremSet("t3", new Expression("(~(p&q)=>(~p|~q))"));
-			assertTrue(t3.equalsHelper(new Expression("(~((a|b)&(c|d))=>(~(a|b)|~(c|d)))"), new Expression("(~(p&q)=>(~p|~q))")));
-			TheoremSet t4 = new TheoremSet("t4", new Expression("(~~~~~~~~~p=>~p)"));
-			assertTrue(t4.equalsHelper(new Expression("(~~~~~~~~~(p&q)=>~(p&q))"), new Expression("(~~~~~~~~~p=>~p)")));
-			TheoremSet t5 = new TheoremSet("t5", new Expression("(~p=>p)"));
-			assertTrue(t5.equalsHelper(new Expression("(~(p&q)=>(p&q))"), new Expression("(~p=>p)")));
-			TheoremSet t6 = new TheoremSet("t6", new Expression("(p|q)"));
-			assertFalse(t6.equalsHelper(new Expression("(~~p=>p)"), new Expression("(p|q)")));
-			//TheoremSet t7 = new TheoremSet("t7", new Expression("(~~(p&q)=>(p&q))"));		// this test fails
-			//assertFalse(t7.equalsHelper(new Expression("(~~p=>p)"), new Expression("(~~(p&q)=>(p&q))")));
+			TheoremSet theorems = new TheoremSet();
+			theorems.put("t1", new Expression("(~~p=>p)"));
+			theorems.put("t2", new Expression("((p=>q)=>(~p|q))"));
+			theorems.put("t3", new Expression("(~(p&q)=>(~p|~q))"));
+			theorems.put("t4", new Expression("(~~~~~~~~~p=>~p)"));
+			theorems.put("t5", new Expression("(~p=>p)"));
+			theorems.put("t6", new Expression("(~~(p&q)=>(p&q))"));
+			assertTrue(theorems.equals("t1", new Expression("(~~(p&q)=>(p&q))")));
+			assertTrue(theorems.equals("t1", new Expression("(~~a=>a)")));
+			assertFalse(theorems.equals("t1", new Expression("(p|q)")));
+			assertTrue(theorems.equals("t2", new Expression("(((a&b)=>c)=>(~(a&b)|c))")));
+			assertFalse(theorems.equals("t2", new Expression("((p=>q)=>(~p&q))")));
+			assertTrue(theorems.equals("t3", new Expression("(~((a|b)&(c|d))=>(~(a|b)|~(c|d)))")));
+			assertTrue(theorems.equals("t4", new Expression("(~~~~~~~~~(p&q)=>~(p&q))")));
+			assertTrue(theorems.equals("t5", new Expression("(~(p&q)=>(p&q))")));
+			assertFalse(theorems.equals("t6", new Expression("(~~p=>p)"))); 
 			
 		} catch (IllegalLineException e) {
 			System.out.println("Mike Clancy's beard is awesome");
 		}
 	}
-
+	
   @Test
 	public void testIsModusPonens() {
 		try {
