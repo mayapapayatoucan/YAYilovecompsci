@@ -18,18 +18,16 @@ public class LineNumber {
 		this.rest = rest;
 	}
 
-	//Concatenates two LineNumbers.
-	public static LineNumber concat(LineNumber l1, LineNumber l2) {
-		
-		if (l1 == null) {
-			return l2;
+	//Concatenates a base linenumber and a local linenumber.
+	public static LineNumber concat(LineNumber base, int localline) {
+	
+
+		if (base == null) {
+			return new LineNumber(localline);
 		}
 
-		while (l1.rest != null) {
-			l1 = l1.rest;
-		}
-		l1.rest = l2;
-		return l1;
+		return new LineNumber(base.head, concat(base.rest, localline));
+
 	}
 
 	public LineNumber (String s) throws IllegalLineException {
@@ -42,7 +40,6 @@ public class LineNumber {
 
 			String[] split = s.split("\\.", 2);
 			int base;
-			System.out.println("head: " + split[0]);
 			try {
 				base = Integer.parseInt(split[0]);
 			}
