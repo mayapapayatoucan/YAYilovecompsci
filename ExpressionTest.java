@@ -68,6 +68,30 @@ public class ExpressionTest {
 	}
 	
 	@Test
+	public void testSize() {
+		try {
+			Expression exp1 = new Expression("(p=>q)");
+			Expression exp2 = new Expression("(p=>q)");
+			Expression exp3 = new Expression("(((p=>q)=>q)=>((q=>p)=>p))");
+			Expression exp4 = new Expression("(((p=>q)=>q)=>((q=>p)=>p))");
+			Expression exp5 = new Expression("p");
+			Expression exp6 = new Expression("p");
+			Expression exp7 = new Expression("~p");
+			Expression exp8 = new Expression("~p");
+			assertEquals(3, exp1.size());
+			assertEquals(3, exp2.size());
+			assertEquals(11, exp3.size());
+			assertEquals(11, exp4.size());
+			assertEquals(1, exp5.size());
+			assertEquals(1, exp6.size());
+			assertEquals(2, exp7.size());
+			assertEquals(2, exp8.size());
+		} catch (IllegalLineException e) {
+			
+		}
+	}
+	
+	@Test
 	public void testExceptions () {
 		//commented ones are the ones which tests fail
 		assertTrue(testhelper("A"));
