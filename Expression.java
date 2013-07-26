@@ -168,4 +168,19 @@ public class Expression {
 	    }
 	    System.out.println (obj);
 	}
+	
+	public int size () {
+		if (root == null) {
+			return 0;
+		} else
+			if ((left == null ) && (right == null)) {
+				return 1;
+			} else if (left == null) {
+				return right.size() + 1;
+			} else if (right == null) {
+				return left.size() + 1;
+			} else {
+				return left.size() + right.size() + 1;
+			}
+	}
 }
