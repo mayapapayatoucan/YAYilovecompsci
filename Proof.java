@@ -2,17 +2,22 @@ import java.util.*;
 
 public class Proof {
 	private HashMap<LineNumber, Expression> lines;
+	private LineNumber base;
 	private LineNumber currentLine;
 	private Expression toBeProved;
 	private Proof subProof;
 	private TheoremSet theorems;
 
-  public Proof (TheoremSet theorems) {
+  	public Proof (TheoremSet theorems) {
 	  lines = new HashMap<LineNumber, Expression>();
 	  currentLine = new LineNumber();
 	  this.theorems = theorems;
-
 	}
+	public Proof (TheoremSet theorems, LineNumber base) {
+		this(theorems);
+		this.base = base;
+	}
+
 
 	public LineNumber nextLineNumber ( ) {
 		if (subProof == null) {
@@ -22,50 +27,43 @@ public class Proof {
 	}
 
 	public void extendProof (String x) throws IllegalLineException, IllegalInferenceException {
-		
-
 		currentLine = nextLineNumber();
-
+		//Feed lines to subproof if currently working on subproof.
 		if (subProof != null) {
 			subProof.extendProof(x);
 		}
 		
-		else {	
+		//Otherwise...
+		else {
+
+			//Separate line by whitespace	
 			String[] currline = x.split(" ");
 			
+			//SHOW
 			if (currline[0].equals("show")) {
 			
 				if (toBeProved != null) {
-					subProof = new Proof(theorems);
-					subProof.extendProof(x);
+					subProof = new Proof(theorems, currentLine);
+					subProof.toBeProved = new Expression(currline[1]);
 
 					//If subproof is completed...
-
 					if (subProof.isComplete()) {
 						currentLine.setRest(null);
 						lines.put(currentLine, subProof.toBeProved());
 						subProof = null;
 					}
-	
 				}
 				else {
 					toBeProved = new Expression(currline[1]);
 				}
-
 			}
 
 			else if (currline[0].equals("ic")) {
 
-				int linenum;
+				
+				LineNumber ref = new LineNumber(currline[1]);
 
-				try {
-					linenum = Integer.parseInt(currline[1]);
-				}
-				catch (NumberFormatException e) {
-					throw new IllegalLineException("Line number is not properly formatted.");
-				}
 
-				LineNumber ref = new LineNumber(linenum);
 				Expression expAtRef = null;
 
 				for (LineNumber l : lines.keySet()) {
@@ -94,10 +92,15 @@ public class Proof {
 				if (toBeProved == null) {
 					throw new IllegalLineException("Made assumption before statement to prove.");
 				}
+
+			
 				if ((new Expression(currline[1])).equals(toBeProved.getLeft())) {
-					lines.put(currentLine, new Expression(currline[1]));
+						//for debugging
+					System.out.println("put " + currentLine.getHead());
+
+					lines.put(LineNumber.concat(base, currentLine), new Expression(currline[1]));
 				}
-			}
+			} 
 			
 /*			else if (currline[0].equals("print")) {
 				System.out.println("These have been proven: ");
