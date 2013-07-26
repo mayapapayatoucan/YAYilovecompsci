@@ -70,34 +70,7 @@ public class Proof {
 				}
 			}
 
-			else if (currline[0].equals("ic")) {
-
-				LineNumber ref = new LineNumber(currline[1]);
-
-				Expression expAtRef = null;
-
-				for (LineNumber l : lines.keySet()) {
-					if (ref.equals(l)) {
-						expAtRef = lines.get(l);
-						break;
-					}
-				}
-
-				if (expAtRef == null) {
-				throw new IllegalLineException("Line number is not valid.");
-				}
-
-				Expression toProve = new Expression(currline[2]);
-				if (!isIC(expAtRef, toProve)) {
-					throw new IllegalInferenceException("Not a valid use of implication construction.");
-				}
-
-				lines.put(base, toProve);
-				proved = true;
-
-
-			}
-					
+			//ASSUME
 			else if (currline[0].equals("assume")) {
 				if (toBeProved == null) {
 					throw new IllegalLineException("Made assumption before statement to prove.");
@@ -109,6 +82,117 @@ public class Proof {
 					lines.put(globalLine(), new Expression(currline[1]));
 				}
 			} 
+
+
+			//PRINT
+
+			//REPEAT
+
+
+			//INFERENCES
+			else {
+
+				//IMPLICATION CONSTRUCTION
+				if (currline[0].equals("ic")) {
+
+					//line reference
+					LineNumber ref = new LineNumber(currline[1]);
+
+					//expression at referenced line
+					Expression expAtRef = null;
+
+					//Search for referenced line.
+					for (LineNumber l : lines.keySet()) {
+						if (ref.equals(l)) {
+							expAtRef = lines.get(l);
+							break;
+						}
+					}
+
+					//If no expression at line was found
+					if (expAtRef == null) {
+					throw new IllegalLineException("Line number is not valid.");
+					}
+
+					//expression to be proven
+					Expression toProve = new Expression(currline[2]);
+
+					//Catch improper use of implication construction.
+					if (!isIC(expAtRef, toProve)) {
+						throw new IllegalInferenceException("Not a valid use of implication construction.");
+					}
+
+					lines.put(base, toProve);
+					proved = true;
+
+				}
+
+				else if (currline.length == 4) {
+
+					LineNumber ref1 = new LineNumber(currline[1]);
+					LineNumber ref2 = new LineNumber(currline[2]);
+					Expression toProve = new Expression(currline[3]);
+
+					Expression exp1 = null;
+					Expression exp2 = null;
+
+					for (LineNumber l : lines.keySet()) {
+						if (ref1.equals(l)) {
+							exp1 = lines.get(l);
+						}
+						if (ref2.equals(l)) {
+							exp2 = lines.get(l);
+						}
+					}
+
+					if (exp1 == null || exp2 == null) {
+						throw new IllegalLineException("Line number is not valid.");
+					}
+
+					if (currline[0].equals("co")) {
+						if (!isCO(exp1, exp2)) {
+							throw new IllegalInferenceException("Not a valid use of contradiction.");
+						}
+					}
+
+					else {
+
+						//MODUS PONENS
+						if (currline[0].equals("mp")) {
+
+
+							if (exp1.size() > exp2.size()) {
+								if (!isMP(exp1, exp2, toProve)) {
+									throw new IllegalInferenceException("Not a valid use of modus ponens.");
+								}
+							}
+							else {
+								if (!isMP(exp2, exp1, toProve)) {
+									throw new IllegalInferenceException("Not a valid use of modus ponens.");
+								}
+							}
+						}
+
+						//MODUS TOLLENS
+						else if (currline[0].equals("mt")) {
+
+							if (exp1.size() > exp2.size()) {
+								if (!isMT(exp1, exp2, toProve)) {
+									throw new IllegalInferenceException("Not a valid use of modus tollens.");
+								}
+							}
+							else {
+								if (!isMT(exp2, exp1, toProve)) {
+									throw new IllegalInferenceException("Not a valid use of modus tollens.");
+								}
+							}
+						}
+					}
+
+					lines.put(base, toProve);
+					proved = true;
+				}
+			}
 			
 /*			else if (currline[0].equals("print")) {
 				System.out.println("These have been proven: ");
