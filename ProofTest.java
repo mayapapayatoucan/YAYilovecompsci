@@ -17,6 +17,7 @@ public class ProofTest {
 			theorems.put("t4", new Expression("(~~~~~~~~~p=>~p)"));
 			theorems.put("t5", new Expression("(~p=>p)"));
 			theorems.put("t6", new Expression("(~~(p&q)=>(p&q))"));
+			theorems.put("t7", new Expression("(~~((p&q)&r)=>(p&(q&r)))"));
 			assertTrue(theorems.equals("t1", new Expression("(~~(p&q)=>(p&q))")));
 			assertTrue(theorems.equals("t1", new Expression("(~~a=>a)")));
 			assertFalse(theorems.equals("t1", new Expression("(p|q)")));
@@ -26,6 +27,7 @@ public class ProofTest {
 			assertTrue(theorems.equals("t4", new Expression("(~~~~~~~~~(p&q)=>~(p&q))")));
 			assertTrue(theorems.equals("t5", new Expression("(~(p&q)=>(p&q))")));
 			assertFalse(theorems.equals("t6", new Expression("(~~p=>p)"))); 
+			assertTrue(theorems.equals("t7", new Expression("(~~(((a&b)&c)&d)=>((a&b)&(c&d)))")))
 			
 		} catch (IllegalLineException e) {
 			System.out.println("Mike Clancy's beard is awesome");
