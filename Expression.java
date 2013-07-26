@@ -10,7 +10,6 @@ public class Expression {
 
 	public Expression (String s) throws IllegalLineException {
 
-		int nest = 0;
 		//Handle empty expression.
 		if (s.length() == 0) {
 			throw new IllegalLineException("Not enough characters to form a valid expression.");
@@ -44,9 +43,11 @@ public class Expression {
 		//Trim parentheses from string.
 		s = s.substring(1, s.length() - 1);
 
+		int nest = 0;
 		//Search for operators.
 		for (int i = 0; i < s.length(); i++) {
 
+			// Keep track of inner parentheses in case there is a missing/extra parenthesis
 			if (s.charAt(i) == '(') {
 				nest++;
 			}
@@ -54,41 +55,50 @@ public class Expression {
 				nest--;
 			}
 
+			// Found an operator
 			if (nest == 0 && operators.contains(s.charAt(i))) {
 
+				// Check its operands
 				if (i == 0 || i == s.length() - 1) {
 					throw new IllegalLineException("Not enough operands.");
 				}
 
+				// Check what the operator is
 				switch (s.charAt(i)) {
 
 					case '=':
+						// Must be =>
 						if (s.charAt(i+1) != '>') {
 							throw new IllegalLineException("Operator is not valid.");
 						}
-
+						
+						// Make into an Expression and exit loop
 						root = '=';
 						left = new Expression(s.substring(0, i));
 						right = new Expression(s.substring(i+2, s.length()));
 						return;
 
 					case '&': case '|':
+						// Must be between operands
 						if (i == 0 || i == s.length()){
 							throw new IllegalLineException("Improper operator location.");
 
 						}
+						
+						// Make into an Expression and exit loop
 						root = s.charAt(i);
 						left = new Expression(s.substring(0, i));
 						right = new Expression(s.substring(i + 1, s.length()));
 						return;
 					}	
 				}
-
 		}
+		// If gone through the entire loop without finding an operator, throw an exception
 		throw new IllegalLineException("No valid operators.");
 
 	}
 	
+	// Separate constructor used internally and for testing purposes
 	public Expression (char myRoot, Expression myLeft, Expression myRight) {
 		root = myRoot;
 		left = myLeft;
@@ -96,7 +106,6 @@ public class Expression {
 	}
 
 	public char getRoot() {
-
 		return root;
 	}
 
@@ -108,20 +117,19 @@ public class Expression {
 		return right;
 	}
 	
+	// Given an expression, this returns the negation of that expression (for example, p becomes ~p)
 	public Expression negate ( ) {
-/*	if (root == '~') {
-			return right;
-} */
 		Expression temp = new Expression(root, left, right);
 		return new Expression('~', null, temp);
 	}
 	
+	// Returns true if every node is equal to the corresponding node in the Expression exp
 	public boolean equals (Expression exp) {
 		return equalsHelper(this, exp);
 	}
 	
 	public static boolean equalsHelper(Expression exp1, Expression exp2) {
-
+		// base cases
 		if (exp1 == null && exp2 == null) {
 			return true;
 		}
@@ -130,13 +138,12 @@ public class Expression {
 			return false;
 		}
 
-		if (exp1.getRoot() != exp2.getRoot()) {  // char equals
+		// Check if the chars at both roots are equal
+		if (exp1.getRoot() != exp2.getRoot()) {
 			return false;
 		}
-		if (!equalsHelper(exp1.getLeft(), exp2.getLeft()) || !equalsHelper(exp1.getRight(), exp2.getRight())) {
-			return false;
-		}
-		return true;
+		// Recursive call on left and right
+		return equalsHelper(exp1.getLeft(), exp2.getLeft()) && equalsHelper(exp1.getRight(), exp2.getRight());
 	}
 
 	
@@ -146,7 +153,29 @@ public class Expression {
 		}
 		return false;
 	}
+
+	// Returns the number of nodes in the tree
+	public int size () {
+		// base case
+		if (root == null) {
+			return 0;
+		} else
+			// base case
+			if ((left == null ) && (right == null)) {
+				return 1;
+			// if no left, look only at right
+			} else if (left == null) {
+				return right.size() + 1;
+			// if no right, look only at left
+			} else if (right == null) {
+				return left.size() + 1;
+			// recursive call on both left and right
+			} else {
+				return left.size() + right.size() + 1;
+			}
+	}
 	
+	// Prints a visual representation of the Expression object as a tree
 	public static void print (Expression e, String description) {
 		System.out.println(description + ":");
 		printHelper(e, 0);
@@ -167,20 +196,5 @@ public class Expression {
 	        System.out.print (indent1);
 	    }
 	    System.out.println (obj);
-	}
-	
-	public int size () {
-		if (root == null) {
-			return 0;
-		} else
-			if ((left == null ) && (right == null)) {
-				return 1;
-			} else if (left == null) {
-				return right.size() + 1;
-			} else if (right == null) {
-				return left.size() + 1;
-			} else {
-				return left.size() + right.size() + 1;
-			}
 	}
 }
