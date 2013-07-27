@@ -76,6 +76,21 @@ public class Proof {
 	}
 
 
+	private void repeat (LineNumber l1, Expression prove) throws IllegalLineException, IllegalInferenceException {
+
+		Expression given1 = lookupLine(l1);
+
+		if (given1.equals(prove)) {
+			if (!check(prove)) {
+				addLine(globalLine(), prove);
+				increment();
+			}
+		}
+		else {
+			throw new IllegalInferenceException("Not a valid use of repeat.");
+		}
+	}
+
 	private void ic (LineNumber l1, Expression prove) throws IllegalLineException, IllegalInferenceException {
 
 		//line reference
@@ -323,6 +338,11 @@ public class Proof {
 
 				throw new IllegalLineException("Invalid number of arguments in repeat statement.");
 			}
+
+			LineNumber l1 = new LineNumber(currline[1]);
+			Expression prove = new Expression(currline[2]);
+
+			repeat(l1, prove);
 
 
 		}
