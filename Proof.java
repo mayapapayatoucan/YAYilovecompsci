@@ -166,6 +166,22 @@ public class Proof {
 		}
 	}
 
+	private void checkTheorem(String theoremName, Expression prove) throws IllegalInferenceException {
+
+		if (theorems.equals(theoremName, prove)) {
+			
+			if (!check(prove)) {
+				addLine(globalLine(), prove);
+				increment();
+			}
+		}
+
+		else {
+			throw new IllegalInferenceException("Not a valid use of theorem.");
+		}
+
+	}
+
 	private void increment() {
 		localLine++;
 	}
@@ -314,8 +330,11 @@ public class Proof {
 		//THEOREMS
 		else if (theorems.getTheorems().containsKey(directive)) {
 
+			if (currline.length != 2) {
+				throw new IllegalLineException("Invalid number of arguments for theorem.");
+			}
 
-
+			checkTheorem(directive, new Expression(currline[1]));
 
 		}
 
