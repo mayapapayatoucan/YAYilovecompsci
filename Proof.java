@@ -36,196 +36,296 @@ public class Proof {
 		return p.globalLine();
 	}
 
+	//Checks to see if proof is over. Returns true if it is, and deals with end-of-proof.
+	private boolean check (Expression e) {
+
+		if (e.equals(toBeProved)) {
+			proved = true;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	private void show (Expression e) {
+		
+		if (toBeProved != null) {
+			subProof = new Proof(theorems, globalLine());
+			subProof.toBeProved = e;
+			subProof.lines = new HashMap<LineNumber, Expression> (lines);
+
+		}
+		else {
+			toBeProved = e;
+			increment();
+		}
+
+	}
+
+	private void assume (Expression e) throws IllegalLineException {
+
+		if (toBeProved == null) {
+			throw new IllegalLineException("Made assumption before statement to prove.");
+		}
+
+		if (e.equals(toBeProved.getLeft()) || e.equals(toBeProved.negate())) {
+			lines.put(globalLine(), e);
+		}
+		increment();
+	}
+
+
+	private void ic (LineNumber l1, Expression prove) throws IllegalLineException, IllegalInferenceException {
+
+		//line reference
+		Expression given1 = lookupLine(l1);
+
+		//Check if expression to prove is an implication, and that our given expression is on the right.
+		if (prove.getRoot() == '=' && given1.equals(prove.getRight())) {
+			
+			if (!check(prove)) {
+				addLine(globalLine(), prove);
+				increment();
+			}
+		}
+
+		else {
+			throw new IllegalInferenceException("Not a valid use of implication.");
+		}
+
+	}
+
+	private void co (LineNumber l1, LineNumber l2, Expression prove) throws IllegalLineException, IllegalInferenceException {
+
+
+		Expression given1 = lookupLine(l1);
+		Expression given2 = lookupLine(l2);
+			
+
+		if (given1.equals(given2.negate()) || given2.equals(given1.negate())) {
+
+			if (!check(prove)) {
+				addLine(globalLine(), prove);
+				increment();
+			}
+		}
+
+		else {
+			throw new IllegalInferenceException("Not a valid use of contradiction.");
+		}
+
+	}
+
+	private void mp (LineNumber l1, LineNumber l2, Expression prove) throws IllegalLineException, IllegalInferenceException {
+
+
+		Expression given1 = lookupLine(l1);
+		Expression given2 = lookupLine(l2);
+
+		if (given1.getRoot() != '=' && given2.getRoot() != '=') {
+			throw new IllegalInferenceException("Not a valid use of modus ponens.");
+		}
+
+		if (given2.equals(given1.getLeft()) && prove.equals(given1.getRight()) ||
+			given1.equals(given2.getLeft()) && prove.equals(given2.getRight())) {
+
+
+			if (!check(prove)) {
+				addLine(globalLine(), prove);
+				increment();
+			}
+		}
+
+		else {
+			throw new IllegalInferenceException("Not a valid use of modus ponens.");
+		}
+	}
+
+	private void mt (LineNumber l1, LineNumber l2, Expression prove) throws IllegalLineException, IllegalInferenceException {
+
+		Expression given1 = lookupLine(l1);
+		Expression given2 = lookupLine(l2);
+
+		if (given1.getRoot() != '=' && given2.getRoot() != '=') {
+			throw new IllegalInferenceException("Not a valid use of modus tollens.");
+		}
+
+		if (given2.equals(given1.getRight().negate()) && prove.equals(given1.getLeft().negate()) ||
+			given1.equals(given2.getRight().negate()) && prove.equals(given2.getLeft().negate())) {
+
+
+			if (!check(prove)) {
+				addLine(globalLine(), prove);
+				increment();
+			}
+		}
+
+		else {
+			throw new IllegalInferenceException("Not a valid use of modus tollens.");
+		}
+	}
+
+	private void increment() {
+		localLine++;
+	}
+
+	private void addLine(LineNumber l, Expression e) {
+
+		lines.put(l, e);
+	}
+
+	private void feed (String x) throws IllegalLineException, IllegalInferenceException {
+
+		subProof.extendProof(x);
+		if (subProof.isComplete()) {
+			//Expression.print(subProof.toBeProved(), "has been proven.");
+			//System.out.println("local line: " + localLine);
+			//Expression.print(subProof.toBeProved, "subProof.toBeProved");
+			lines.put(LineNumber.concat(base, localLine), subProof.toBeProved);
+			subProof = null;
+			increment();
+		}
+	}
+
+	//Searches for l in our store of valid lines. Returns expression at that line if found. Throws exception if nothing is found.
+	private Expression lookupLine (LineNumber toFind) throws IllegalLineException {
+
+		for (LineNumber l : lines.keySet()) {
+			if (l.equals(toFind)) {
+				return lines.get(l);
+			}
+		}
+		throw new IllegalLineException("Line number does not correspond to a valid line.");
+
+	}
+
 	public void extendProof (String x) throws IllegalLineException, IllegalInferenceException {
+		
+		//Separate line by whitespace
+		String[] currline = x.split(" ");
+		if (currline.length == 0) {
+			throw new IllegalLineException("Enter an input");
+		}
+		String directive = currline[0];
 		
 		//Feed lines to subproof if currently working on subproof.
 		if (subProof != null) {
-			subProof.extendProof(x);
-			if (subProof.isComplete()) {
-				System.out.println("subProof is complete");
-				System.out.println(LineNumber.concat(base, localLine - 1));
-				Expression.print(subProof.toBeProved, "subProof.toBeProved");
-				lines.put(LineNumber.concat(base, localLine - 1), subProof.toBeProved);
-				subProof = null;
-			}
+			feed(x);
 		}
-		
-		//Otherwise...
+
+		//SHOW
+		else if (directive.equals("show")) {
+
+			if (currline.length != 2) {
+				throw new IllegalLineException("Invalid number of arguments in show statement.");
+			}
+
+			show(new Expression(currline[1]));
+		}
+
+		//ASSUME
+		else if (directive.equals("assume")) {
+
+			if (currline.length != 2) {
+				throw new IllegalLineException("Invalid number of arguments in assume statement.");
+			}
+
+			assume(new Expression(currline[1]));
+		}
+
+		//IMPLICATION CONSTRUCTION
+		else if (directive.equals("ic")) {
+
+			if (currline.length != 3) {
+				throw new IllegalLineException("Invalid number of arguments in ic statement.");
+			}
+
+			LineNumber given = new LineNumber(currline[1]);
+			Expression prove = new Expression(currline[2]);
+
+			ic(given, prove);
+		}
+
+		//CONTRADICTION
+		else if (directive.equals("co")) {
+
+			if (currline.length != 4) {
+				throw new IllegalLineException("Invalid number of arguments in co statement.");
+			}
+
+			LineNumber l1 = new LineNumber(currline[1]);
+			LineNumber l2 = new LineNumber(currline[2]);
+			Expression prove = new Expression(currline[3]);
+
+			co(l1, l2, prove);
+		}
+
+		//MODUS PONENS
+		else if (directive.equals("mp")) {
+
+			if (currline.length != 4) {
+				throw new IllegalLineException("Invalid number of arguments in mp statement.");
+			}
+
+			LineNumber l1 = new LineNumber(currline[1]);
+			LineNumber l2 = new LineNumber(currline[2]);
+			Expression prove = new Expression(currline[3]);
+
+			mp(l1, l2, prove);
+		}
+
+		//MODUS TOLLENS
+		else if (directive.equals("mt")) {
+
+			if (currline.length != 4) {
+				throw new IllegalLineException("Invalid number of arguments in mt statement.");
+			}
+
+			LineNumber l1 = new LineNumber(currline[1]);
+			LineNumber l2 = new LineNumber(currline[2]);
+			Expression prove = new Expression(currline[3]);
+
+			mt(l1, l2, prove);
+		}
+
+
+		//PRINT
+		else if (directive.equals("print")) {
+
+			if (currline.length != 1) {
+
+				throw new IllegalLineException("Print does not take arguments.");
+			}
+
+		}
+
+		//REPEAT
+		else if (directive.equals("repeat")) {
+
+			if (currline.length != 3) {
+
+				throw new IllegalLineException("Invalid number of arguments in repeat statement.");
+			}
+
+
+		}
+
+		//THEOREMS
+		else if (theorems.getTheorems().containsKey(directive)) {
+
+
+
+
+		}
+
+		//Otherwise, the line is not valid.
 		else {
 
-			//Separate line by whitespace	
-			String[] currline = x.split(" ");
-			if (currline.length == 0) {
-				throw new IllegalLineException("Enter an input");
-			}
-			
-			//SHOW
-			if (currline[0].equals("show")) {
-			
-				if (toBeProved != null) {
-					subProof = new Proof(theorems, globalLine());
-					subProof.toBeProved = new Expression(currline[1]);
-					subProof.lines = new HashMap<LineNumber, Expression> (lines);
-
-					//If subproof is completed...
-					if (subProof.isComplete()) {
-						lines.put(globalLine(), subProof.toBeProved());
-						subProof = null;
-					}
-				}
-				else {
-					toBeProved = new Expression(currline[1]);
-				}
-			}
-
-			//ASSUME
-			else if (currline[0].equals("assume")) {
-				if (toBeProved == null) {
-					throw new IllegalLineException("Made assumption before statement to prove.");
-				}
-
-			
-				if ((new Expression(currline[1])).equals(toBeProved.getLeft()) || (new Expression(currline[1])).equals(toBeProved.negate())) {
-					System.out.println("pu$$y money weed");
-					lines.put(globalLine(), new Expression(currline[1]));
-				}
-			} 
-
-
-			//PRINT
-
-			//REPEAT
-
-
-			//INFERENCES
-			else {
-
-				//IMPLICATION CONSTRUCTION
-				if (currline[0].equals("ic")) {
-
-					//line reference
-					LineNumber ref = new LineNumber(currline[1]);
-
-					//expression at referenced line
-					Expression expAtRef = null;
-
-					//Search for referenced line.
-					for (LineNumber l : lines.keySet()) {
-						if (ref.equals(l)) {
-							expAtRef = lines.get(l);
-							break;
-						}
-					}
-
-					//If no expression at line was found
-					if (expAtRef == null) {
-						throw new IllegalLineException("Line number is not valid.");
-					}
-
-					//expression to be proven
-					Expression toProve = new Expression(currline[2]);
-
-					//Catch improper use of implication construction.
-					if (!isIC(expAtRef, toProve)) {
-						throw new IllegalInferenceException("Not a valid use of implication construction.");
-					}
-
-					//lines.put(base, toProve);
-					//proved = true;
-
-				}
-
-				else if (currline.length == 4) {
-
-					LineNumber ref1 = new LineNumber(currline[1]);
-					LineNumber ref2 = new LineNumber(currline[2]);
-					Expression toProve = new Expression(currline[3]);
-
-					Expression exp1 = null;
-					Expression exp2 = null;
-
-					for (LineNumber l : lines.keySet()) {
-						if (l.equals(ref1)) {
-							exp1 = lines.get(l);
-						}
-						if (l.equals(ref2)) {
-							exp2 = lines.get(l);
-						}
-					}
-
-					if (exp1 == null || exp2 == null) {
-						for (LineNumber l : lines.keySet()) {
-							Expression.print(lines.get(l), "expressions in lines");
-						}
-						Expression.print(exp1, "exp1");
-						Expression.print(exp2, "exp2");
-						throw new IllegalLineException("Line number is not valid.");
-					}
-
-					if (currline[0].equals("co")) {
-						for (LineNumber l : lines.keySet()) {
-							Expression.print(lines.get(l), "expressions in lines");
-						}
-						//Expression.print(exp1, "exp1");
-						//Expression.print(exp2, "exp2");
-						if (!isCO(exp1, exp2)) {
-							throw new IllegalInferenceException("Not a valid use of contradiction.");
-						}
-					}
-
-					else {
-
-						//MODUS PONENS
-						if (currline[0].equals("mp")) {
-
-
-							if (exp1.size() > exp2.size()) {
-								if (!isMP(exp1, exp2, toProve)) {
-									throw new IllegalInferenceException("Not a valid use of modus ponens.");
-								}
-							}
-							else {
-								if (!isMP(exp2, exp1, toProve)) {
-									throw new IllegalInferenceException("Not a valid use of modus ponens.");
-								}
-							}
-						}
-
-						//MODUS TOLLENS
-						else if (currline[0].equals("mt")) {
-
-							if (exp1.size() > exp2.size()) {
-								if (!isMT(exp1, exp2, toProve)) {
-									throw new IllegalInferenceException("Not a valid use of modus tollens.");
-								}
-							}
-							else {
-								if (!isMT(exp2, exp1, toProve)) {
-									throw new IllegalInferenceException("Not a valid use of modus tollens.");
-								}
-							}
-						}
-					}
-					if (toProve.equals(toBeProved)) {
-						proved = true;
-					}
-					System.out.println("Putting in line: " + globalLine());
-					lines.put(globalLine(), new Expression(currline[currline.length - 1]));
-				}
-			}
-			
-/*			else if (currline[0].equals("print")) {
-				System.out.println("These have been proven: ");
-				for (int i = 0; i < lines.size(); i++) {
-					Expression.print(lines.getHead(i), "");		// write as string
-				}	
-			}
-*/
-			localLine++;
+			throw new IllegalLineException("Not a valid line.");
 		}
-
-		
 	}
+
 
 	public String toString ( ) {
 		return "";
@@ -234,30 +334,9 @@ public class Proof {
 	public boolean isComplete ( ) {
 		return proved;
 	}
-	
-	public static boolean isMP (Expression imp, Expression given, Expression proven) {
-		return imp.getLeft().equals(given) && imp.getRight().equals(proven);
-	}
-	
-	public static boolean isMT (Expression imp, Expression given, Expression proven) {
-		
-		return imp.getLeft().negate().equals(proven) && imp.getRight().negate().equals(given);
-	}
-	
-	public static boolean isIC (Expression given, Expression proven) {
-		
-		if (proven.getRoot() != '=') {
-			return false;
-		}
-		return proven.getRight().equals(given);
-	}
-	
-	public static boolean isCO (Expression given1, Expression given2) {
-		
-		return (given1.negate().equals(given2) || given2.negate().equals(given1));
-	}
 
 	public Expression toBeProved() {
 		return toBeProved;
 	}
+
 }
