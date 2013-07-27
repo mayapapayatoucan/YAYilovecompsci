@@ -86,21 +86,21 @@ public class ProofTest {
 }
 
 @Test
-public void testisContradiction() {
-	try {			
-		assertTrue(Proof.isC(new Expression("~p"), new Expression("p")));
-		assertTrue(Proof.isC(new Expression("~(p&q)"), new Expression("(p&q)")));
-		assertTrue(Proof.isC(new Expression("~(p&(q&r))"), new Expression("~~(p&(q&r))")));
-		
-		assertFalse(Proof.isC(new Expression("~~p"), new Expression("p")));
-		
-		// Again, the below case is logically valid but for the purposes of our program, should return false		
-		assertFalse(Proof.isC(new Expression("~~~~~p"), new Expression("p")));
-		
-
-	} catch (IllegalLineException e){
+	public void testisContradiction() {
+		try {			
+			assertTrue(Proof.isCO(new Expression("~p"), new Expression("p")));
+			assertTrue(Proof.isCO(new Expression("~(p&q)"), new Expression("(p&q)")));
+			assertTrue(Proof.isCO(new Expression("~(p&(q&r))"), new Expression("~~(p&(q&r))")));
+			
+			assertFalse(Proof.isCO(new Expression("~~p"), new Expression("p")));
+			
+			assertFalse(Proof.isCO(new Expression("~~~~~p"), new Expression("p")));
+			// Again, the above case is logically valid but for the purposes of our program, should return false
+			
+	
+		} catch (IllegalLineException e){
+		}
 	}
-}
 
 
 
