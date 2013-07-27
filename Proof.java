@@ -209,7 +209,8 @@ public class Proof {
 					if (toProve.equals(toBeProved)) {
 						proved = true;
 					}
-					lines.put(base, toProve);
+					System.out.println("Putting in line: " + globalLine());
+					lines.put(globalLine(), new Expression(currline[currline.length - 1]));
 				}
 			}
 			
