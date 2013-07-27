@@ -6,6 +6,8 @@ public class Proof {
 	private int localLine;
 	private Expression toBeProved;
 	private Proof subProof;
+	private Proof superProof;
+	private ArrayList<String> allLines;
 	private TheoremSet theorems;
 	private boolean proved;
 
@@ -14,11 +16,13 @@ public class Proof {
 	  localLine = 1;
 	  this.theorems = theorems;
 	  proved = false;
+	  allLines = new ArrayList<String>();
 	}
 
-	public Proof (TheoremSet theorems, LineNumber base) {
+	public Proof (TheoremSet theorems, LineNumber base, Proof sup) {
 		this(theorems);
 		this.base = base;
+		this.superProof = sup;
 	}
 
 	//Returns current line number in context of global proof.
@@ -51,7 +55,7 @@ public class Proof {
 	private void show (Expression e) {
 		
 		if (toBeProved != null) {
-			subProof = new Proof(theorems, globalLine());
+			subProof = new Proof(theorems, globalLine(), this);
 			subProof.toBeProved = e;
 			subProof.lines = new HashMap<LineNumber, Expression> (lines);
 
@@ -69,9 +73,12 @@ public class Proof {
 			throw new IllegalLineException("Made assumption before statement to prove.");
 		}
 
-		if (e.equals(toBeProved.getLeft()) || e.equals(toBeProved.negate())) {
-			lines.put(globalLine(), e);
+		if (!(e.equals(toBeProved.getLeft()) || e.equals(toBeProved.negate()))) {
+			throw new IllegalLineException("You can't assume that.");
+			
 		}
+		lines.put(globalLine(), e);
+
 		increment();
 	}
 
@@ -88,6 +95,16 @@ public class Proof {
 		}
 		else {
 			throw new IllegalInferenceException("Not a valid use of repeat.");
+		}
+	}
+
+	private void markLine (LineNumber l, String s) {
+
+		if (superProof == null) {
+			allLines.add(l.toString() + " " + s);
+		}
+		else {
+			superProof.markLine(l, s);
 		}
 	}
 
@@ -240,8 +257,24 @@ public class Proof {
 		}
 		String directive = currline[0];
 		
+
+		//PRINT
+		if (directive.equals("print")) {
+
+			if (currline.length != 1) {
+
+				throw new IllegalLineException("Print does not take arguments.");
+			}
+
+			System.out.println("");
+			for (String s : allLines) {
+				System.out.println(s);
+			}
+			System.out.println("");
+		}
+
 		//Feed lines to subproof if currently working on subproof.
-		if (subProof != null) {
+		else if (subProof != null) {
 			feed(x);
 		}
 
@@ -253,6 +286,7 @@ public class Proof {
 			}
 
 			show(new Expression(currline[1]));
+			markLine(LineNumber.concat(base, localLine -1), x); 
 		}
 
 		//ASSUME
@@ -263,6 +297,7 @@ public class Proof {
 			}
 
 			assume(new Expression(currline[1]));
+			markLine(LineNumber.concat(base, localLine -1), x); 
 		}
 
 		//IMPLICATION CONSTRUCTION
@@ -276,6 +311,7 @@ public class Proof {
 			Expression prove = new Expression(currline[2]);
 
 			ic(given, prove);
+			markLine(LineNumber.concat(base, localLine -1), x); 
 		}
 
 		//CONTRADICTION
@@ -290,6 +326,7 @@ public class Proof {
 			Expression prove = new Expression(currline[3]);
 
 			co(l1, l2, prove);
+			markLine(LineNumber.concat(base, localLine -1), x); 
 		}
 
 		//MODUS PONENS
@@ -304,6 +341,7 @@ public class Proof {
 			Expression prove = new Expression(currline[3]);
 
 			mp(l1, l2, prove);
+			markLine(LineNumber.concat(base, localLine -1), x); 
 		}
 
 		//MODUS TOLLENS
@@ -318,17 +356,7 @@ public class Proof {
 			Expression prove = new Expression(currline[3]);
 
 			mt(l1, l2, prove);
-		}
-
-
-		//PRINT
-		else if (directive.equals("print")) {
-
-			if (currline.length != 1) {
-
-				throw new IllegalLineException("Print does not take arguments.");
-			}
-
+			markLine(LineNumber.concat(base, localLine -1), x); 
 		}
 
 		//REPEAT
@@ -343,6 +371,7 @@ public class Proof {
 			Expression prove = new Expression(currline[2]);
 
 			repeat(l1, prove);
+			markLine(LineNumber.concat(base, localLine -1), x); 
 
 
 		}
@@ -355,6 +384,7 @@ public class Proof {
 			}
 
 			checkTheorem(directive, new Expression(currline[1]));
+			markLine(LineNumber.concat(base, localLine -1), x); 
 
 		}
 
