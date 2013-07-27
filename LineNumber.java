@@ -83,7 +83,15 @@ public class LineNumber {
 	}
 
 	public boolean equals(LineNumber l) {
+
+		if (l == null) {
+			return false;
+		}
+
 		if (rest == null) {
+			if (l.getRest() != null) {
+				return false;
+			}
 			return head == l.getHead();
 		}
 		return (head == l.getHead() && rest.equals(l.getRest()));
