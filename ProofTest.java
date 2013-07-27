@@ -9,7 +9,7 @@ public class ProofTest {
 	
 	//The tests in onlineExampleProofs are taken from the example proofs on the project 2 specs.
 	@Test
-	public void onlineExampleProofs( ) {
+	public void workingProofs( ) {
 		try{
 		/*p1 is the following proof:
 		 * 1 show (p=>p)
@@ -120,9 +120,9 @@ public class ProofTest {
 		p4.extendProof("ic 3 (p=>((p=>q)=>q))");
 		assertTrue(p4.isComplete());		
 		} catch (IllegalLineException e){
-			System.out.println("bad line on p1!");
+			System.out.println("bad line on p4!");
 		} catch (IllegalInferenceException e2) {
-			System.out.println("bad inference on p1!");
+			System.out.println("bad inference on p4!");
 		}
 	}
 	
@@ -145,9 +145,114 @@ public class ProofTest {
 			p1.extendProof("repeat 2 (p=>p)");
 			assertTrue(p1.isComplete());
 		} catch (IllegalLineException e){
-			System.out.println("bad line on p1!");
+			System.out.println("bad line!");
 		} catch (IllegalInferenceException e2) {
-			System.out.println("bad inference on p1!");
+			System.out.println("bad inference!");
+		}
+	}
+	
+	@Test
+	public void testPrint ( ) {
+		// tests the print method. Tests are given print examples from the online specs.
+		try{
+			/* p1 is the following proof:
+			 * 1 show (p=>p)
+			 * 2 assume p
+			 * 3 show ~p
+			 * 3.1 print
+			*/
+		Proof p1 = new Proof(null);
+		p1.extendProof("show (p=>p)");
+		p1.extendProof("assume p");
+		p1.extendProof("show ~p");
+		// I'm not too sure how to actually test this since the print method is just using System.out.println.
+		System.out.println(p1.extendProof("print"));
+		} catch (IllegalLineException e) {
+			System.out.println("bad line!");
+		} catch (IllegalInferenceException e2) {
+			System.out.println("bad inference!");
+		}
+	}
+	
+	@Test 
+	public void testBadLines ( ) {
+		// the following are some example proofs from the online specs with bad lines that ultimately give a valid proof.
+		try {
+			/* p1 is the following proof:
+			
+			inst.eecs.berkeley.edu/~cs61bl/su13/projects/proj2/SampleProofs/proof01.txt
+			
+			*/
+		Proof p1 = new Proof(null);
+		p1.extendProof("show ((a=>b)=>((b=>c)=>(a=>c)))");
+		p1.extendProof("assume (a=>b)");
+		p1.extendProof("show ((b=>c)=>(a=>c))");
+		p1.extendProof("assume (b=>c)");
+		p1.extendProof("show (a=>c)");
+		p1.extendProof("assume a");
+		p1.extendProof("show c");
+		p1.extendProof("assume ~c");
+		p1.extendProof("mt 3.2.2.1 3.1 ~b");
+		p1.extendProof("mt 2 3.2.2.2 ~a");
+		p1.extendProof("co 3.2.2.3 3.2.1");
+		//Again, I'm not sure how to test the output for this but if you follow the link above you'll se what it is that we are supposed to test.
+		p1.extendProof("co 3.2.2.3 3.2.1 c");
+		p1.extendProof("ic 3.2.2.4 (a=>c)");
+		// There should be another line output here saying "Unable to refer to line 3.2.2.4".
+		p1.extendProof("ic 3.2.2 (a=>c)");
+		p1.extendProof("ic 3.2 ((b=>c)=>(a=>c))");
+		p1.extendProof("ic 3 ((a=>b)=>((b=>c)=>(a=>c)))");
+		assertTrue(p1.isComplete());
+		} catch (IllegalLineException e) {
+	
+		} catch (IllegalInferenceException e2{
+			
+		}
+	}
+	
+	@Test
+	public void theoremProofs ( ) {
+		/* The following proof is taken from the online specs and tests the use of theorems in a proof.
+			inst.eecs.berkeley.edu/~cs61bl/su13/projects/proj2/SampleProofs/proof04.txt
+		*/
+		try {
+			Proof p1 = new Proof(null);
+			p1.extendProof("show ((p|q)=>(~p=>q))");
+			p1.extendProof("assume (p|q)");
+			p1.extendProof("show (~p=>q)");
+			p1.extendProof("assume ~p");
+			p1.extendProof("show q");
+			p1.extendProof("assume ~q");
+			p1.extendProof("buildAnd (~p=>(~p=>(~p&~q)))");
+			p1.extendProof("mp 3.1 3.2.2 (~p=>(~p&~q))");
+			p1.extendProof("3.2.3 3.2.1 (~p=>~q)");
+			p1.extendProof("demorgan2 ((~p&~q)=>~(p|q))");
+			p1.extendProof("mp 3.2.4 3.2.5 ~(p|q)");
+			p1.extendProof("co 3.2.6 2 q");
+			p1.extendProof("ic 3.2 (~p=>q)");
+			p1.extendProof("ic 3 ((p|q)=>(~p=>q))");
+			asssertTrue(p1.isComplete());
+			
+		/* p2 is the following proof taken from the online specs:
+		
+		inst.eecs.berkeley.edu/~cs61bl/su13/projects/proj2/SampleProofs/proof05.txt
+		
+		*/
+			Proof p2 = new Proof(null);
+			p1.extendProof("show (a=>~~a)");
+			p1.extendProof("assume a");
+			p1.extendProof("show ~~a");
+			p1.extendProof("assume ~~~a");
+			p1.extendProof("dn (~~~a=>~a)");
+			p1.extendProof("mp 3.2 3.1 ~a");
+			p1.extendProof("co 2 3.3 ~~a");
+			p1.extendProof("ic 3 (a=>~~a)");
+			assertTrue(p2.isComplete());
+			
+		} catch (IllegalLineException e){
+			
+		} catch (IllegalInferenceException e2){
+			
 		}
 	}
 	
