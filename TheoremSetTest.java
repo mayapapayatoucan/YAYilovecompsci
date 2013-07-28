@@ -5,7 +5,7 @@ import org.junit.Test;
 
 public class TheoremSetTest {
 
-  @Test
+	@Test
 	public void testTheoremSet() {
 		try{
 			TheoremSet theorems = new TheoremSet();
@@ -16,6 +16,7 @@ public class TheoremSetTest {
 			theorems.put("t5", new Expression("(~p=>p)"));
 			theorems.put("t6", new Expression("(~~(p&q)=>(p&q))"));
 			theorems.put("t7", new Expression("(~~((p&q)&r)=>(p&(q&r)))"));
+			theorems.put("not-or-creation", new Expression("(~p=>(~q=>~(p|q)))"));
 			assertTrue(theorems.equals("t1", new Expression("(~~(p&q)=>(p&q))")));
 			assertTrue(theorems.equals("t1", new Expression("(~~a=>a)")));
 			assertFalse(theorems.equals("t1", new Expression("(p|q)")));
@@ -26,9 +27,11 @@ public class TheoremSetTest {
 			assertTrue(theorems.equals("t5", new Expression("(~(p&q)=>(p&q))")));
 			assertFalse(theorems.equals("t6", new Expression("(~~p=>p)")));
 			assertTrue(theorems.equals("t7", new Expression("(~~(((a&b)&c)&d)=>((a&b)&(c&d)))")));
+			assertFalse(theorems.equals("not-or-creation", new Expression("(~a=>(~b=>~(b|b)))")));
+			assertTrue(theorems.equals("not-or-creation", new Expression("(~a=>(~b=>~(a|b)))")));
 			
 		} catch (IllegalLineException e) {
-			System.out.println("Mike Clancy's beard is awesome");
+			fail();
 		}
 	}
 
