@@ -152,8 +152,8 @@ public class ProofTest {
 	}
 	
 	@Test
-	public void testPrint ( ) {
-		// tests the print method. Tests are given print examples from the online specs.
+	public void testPrintAndToString ( ) {
+		// tests the print and toString methods. Tests are given print examples from the online specs.
 		try{
 			/* p1 is the following proof:
 			 * 1 show (p=>p)
@@ -165,9 +165,10 @@ public class ProofTest {
 		p1.extendProof("show (p=>p)");
 		p1.extendProof("assume p");
 		p1.extendProof("show ~p");
-		// I'm not too sure how to actually test this since the print method is just using System.out.println.
 		p1.extendProof("print");
 		assertTrue(p1.printIsOK());
+		assertTrue(p1.toString().equals("1 show (p=>p) / 2 assume p / 3 show ~p / "));
+		//assertEquals();
 		} catch (IllegalLineException e) {
 			System.out.println("bad line!");
 		} catch (IllegalInferenceException e2) {
@@ -261,74 +262,6 @@ public class ProofTest {
 			
 		}
 	}
-	
-/*	  @Test
-		public void testIsModusPonens() {
-			try {
-				assertTrue(Proof.isMP(new Expression("(p=>q)"), new Expression("p"), new Expression("q")));
-				assertTrue(Proof.isMP(new Expression("((p=>q)=>(t=>r))"), new Expression("(p=>q)"), new Expression("(t=>r)")));
-				assertTrue(Proof.isMP(new Expression("((p&d)=>q)"), new Expression("(p&d)"), new Expression("q")));
-				
-				//the test below is logically true, but should not pass this test as IsModusPonies is written right now.
-				assertFalse(Proof.isMP(new Expression("(~p|q)"), new Expression("p"), new Expression("q")));
-				assertFalse(Proof.isMP(new Expression("((p|q)=>z)"), new Expression("p"), new Expression("z")));
-				
-				assertFalse(Proof.isMP(new Expression("(p=>q)"), new Expression("~q"), new Expression("~q")));
-				assertFalse(Proof.isMP(new Expression("((p=>q)=>(t=>r))"), new Expression("(t=>r)"), new Expression("(p=>q)")));
-				assertFalse(Proof.isMP(new Expression("(p=>q)"), new Expression("q"), new Expression("q")));
-				
-			} catch (IllegalLineException e){
-			}
-		}
-	@Test
-		public void testIsModusTollens() {
-			try {
-				assertTrue(Proof.isMT(new Expression("(p=>q)"), new Expression("~q"), new Expression("~p")));
-				assertTrue(Proof.isMT(new Expression("((r&s)=>(t|u))"), new Expression("~(t|u)"), new Expression("~(r&s)")));
-				assertTrue(Proof.isMT(new Expression("(~(z&x)=>~(h|g))"), new Expression("~~(h|g)"), new Expression("~~(z&x)")));
-				assertTrue(Proof.isMT(new Expression("(~(z=>x)=>~(h=>g))"), new Expression("~~(h=>g)"), new Expression("~~(z=>x)")));
-				
-				
-				assertFalse(Proof.isMT(new Expression("(~(z&x)=>~(h|g))"), new Expression("(h|g)"), new Expression("(z&x)")));
-				// while the above line is logically valid, for the purposes of our program, it should not equate double negation to no negation
-				assertFalse(Proof.isMT(new Expression("(p=>q)"), new Expression("q"), new Expression("~p")));
-			} catch (IllegalLineException e){
-			}
-	
-		}
-	
-	@Test
-		public void testisImplicationConstruction() {
-			try {			
-				assertTrue(Proof.isIC(new Expression("q"), new Expression("(p=>q)")));
-				assertTrue(Proof.isIC(new Expression("(p&q)"), new Expression("((q|p)=>(p&q))")));
-				assertTrue(Proof.isIC(new Expression("~(q&r)"), new Expression("(p=>~(q&r))")));
-				
-				assertFalse(Proof.isIC(new Expression("~~(p&q)"), new Expression ("(p&q")));
-				// Again, the above case is logically valid but for the purposes of our program, should return false
-				assertFalse(Proof.isIC(new Expression("(p&r)"), new Expression("(p=>(p&q)")));
-				
-			} catch (IllegalLineException e){
-			}
-	}
-	
-	@Test
-	public void testisContradiction() {
-		try {			
-			assertTrue(Proof.isCO(new Expression("~p"), new Expression("p")));
-			assertTrue(Proof.isCO(new Expression("~(p&q)"), new Expression("(p&q)")));
-			assertTrue(Proof.isCO(new Expression("~(p&(q&r))"), new Expression("~~(p&(q&r))")));
-			
-			assertFalse(Proof.isCO(new Expression("~~p"), new Expression("p")));
-			
-			assertFalse(Proof.isCO(new Expression("~~~~~p"), new Expression("p")));
-			// Again, the above case is logically valid but for the purposes of our program, should return false
-			
-	
-		} catch (IllegalLineException e){
-		}
-	} */
-	
 	
 	
 	}
