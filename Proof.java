@@ -10,6 +10,7 @@ public class Proof {
 	private ArrayList<String> allLines;
 	private TheoremSet theorems;
 	private boolean proved;
+	private boolean printed; // for testing purposes; see testPrint() in ProofTest.java
 
   	public Proof (TheoremSet theorems) {
 	  lines = new HashMap<LineNumber, Expression>();
@@ -271,6 +272,7 @@ public class Proof {
 				System.out.println(s);
 			}
 			System.out.println("");
+			printed = true;
 		}
 
 		//Feed lines to subproof if currently working on subproof.
@@ -395,7 +397,14 @@ public class Proof {
 		}
 	}
 
-
+	public Proof getSubProof() {
+		return subProof;
+	}
+	
+	public int getLine() {
+		return localLine;
+	}
+	
 	public String toString ( ) {
 		return "";
 	}
@@ -406,6 +415,10 @@ public class Proof {
 
 	public Expression toBeProved() {
 		return toBeProved;
+	}
+	
+	public boolean printIsOK() {
+		return printed;
 	}
 
 }
