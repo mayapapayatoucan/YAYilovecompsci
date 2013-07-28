@@ -20,18 +20,20 @@ public class TheoremSet {
 	}
 	
 	public boolean equals (String theoremName, Expression e) {
-		Expression.print(this.get(theoremName), theoremName);
-		
 		/*We compare the sizes of the expressions in order to quickly tell whether the given expression is
 		 * more general than the theorem. For example, if the given expression is (p=>p) and the theorem is
 		 * ((a&b)=>(a&b)), that would not be a valid use of the theorem. */
-		
 		if (this.get(theoremName).size() > e.size()) {
 			return false;
 		}
 		
 		//call upon helper!!
-		return equalsHelper(this.get(theoremName), e);
+		boolean output = equalsHelper(this.get(theoremName), e);
+		
+		// reset the mapping
+		expCompare = new HashMap<Expression, Expression> ();
+		
+		return output;
 	}
 
 	public boolean equalsHelper (Expression theorem, Expression e) {
@@ -39,6 +41,7 @@ public class TheoremSet {
 		if (theorem == null || e == null) {
 			return true;
 		} 
+		
 		/*  The given expression must contain at least all of the operators in the theorem. This if statement checks that all of
 		 * the theorem's operators are present in the given expression.
 		*/
@@ -46,19 +49,26 @@ public class TheoremSet {
 			return false;
 		}
 		
-		// This maps the variable in the theorem to variable or larger expression in the given expression
-		if (expCompare.containsKey(theorem.getRoot())) {
-			if (expCompare.get(theorem).equals(e)) {
-				return true;
-			} else {
-				//if this mapping fails, then it is not a valid use of the theorem
-				return false;
+		// Checks if a mapping exists from the variable in the theorem to variable or larger expression in the given expression
+		for (Expression exp : expCompare.keySet()) {
+			if (exp.equals(theorem)) {
+				
+				if (e.equals(expCompare.get(exp))) {
+					
+					return true;
+				} else {
+					
+					//if this mapping fails, then it is not a valid use of the theorem
+					return false;
+				}
 			}
 		}
-		expCompare.put(theorem, e);
 		
-		//this is being called recursively on the left and right nodes of the expressions
-		return equalsHelper(e.getLeft(), theorem.getLeft()) && equalsHelper(e.getRight(), theorem.getRight()); 
+		// If the mapping didn't exist, create one
+		expCompare.put(theorem, e);
+
+		// Call recursively on the left and right nodes of the expressions
+		return equalsHelper(theorem.getLeft(), e.getLeft()) && equalsHelper(theorem.getRight(), e.getRight()); 
 	}
 	
 	public HashMap<String, Expression> getTheorems() {
