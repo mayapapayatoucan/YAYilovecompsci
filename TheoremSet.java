@@ -9,8 +9,7 @@ public class TheoremSet {
 	private static final List<Character> operators = Arrays.asList('&', '|', '=', '~');
 	
 	public TheoremSet ( ) {
-	}
-	
+	} 
 	
 	public Expression put (String theoremName, Expression theorem) {
 		return theorems.put(theoremName, theorem);
@@ -60,5 +59,9 @@ public class TheoremSet {
 		
 		//this is being called recursively on the left and right nodes of the expressions
 		return equalsHelper(e.getLeft(), theorem.getLeft()) && equalsHelper(e.getRight(), theorem.getRight()); 
+	}
+	
+	public HashMap<String, Expression> getTheorems() {
+		return theorems;
 	}
 }
