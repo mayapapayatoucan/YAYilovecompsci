@@ -166,7 +166,8 @@ public class ProofTest {
 		p1.extendProof("assume p");
 		p1.extendProof("show ~p");
 		// I'm not too sure how to actually test this since the print method is just using System.out.println.
-		System.out.println(p1.extendProof("print"));
+		p1.extendProof("print");
+		assertTrue(p1.printIsOK());
 		} catch (IllegalLineException e) {
 			System.out.println("bad line!");
 		} catch (IllegalInferenceException e2) {
@@ -205,7 +206,7 @@ public class ProofTest {
 		assertTrue(p1.isComplete());
 		} catch (IllegalLineException e) {
 	
-		} catch (IllegalInferenceException e2{
+		} catch (IllegalInferenceException e2) {
 			
 		}
 	}
@@ -216,7 +217,10 @@ public class ProofTest {
 			inst.eecs.berkeley.edu/~cs61bl/su13/projects/proj2/SampleProofs/proof04.txt
 		*/
 		try {
-			Proof p1 = new Proof(null);
+			TheoremSet proof04 = new TheoremSet();
+			proof04.put("buildAnd", new Expression("(a=>(b=>(a&b))"));
+			proof04.put("demorgan2", new Expression("((~a&~b)=>~(a|b))"));
+			Proof p1 = new Proof(proof04);
 			p1.extendProof("show ((p|q)=>(~p=>q))");
 			p1.extendProof("assume (p|q)");
 			p1.extendProof("show (~p=>q)");
@@ -231,13 +235,15 @@ public class ProofTest {
 			p1.extendProof("co 3.2.6 2 q");
 			p1.extendProof("ic 3.2 (~p=>q)");
 			p1.extendProof("ic 3 ((p|q)=>(~p=>q))");
-			asssertTrue(p1.isComplete());
+			assertTrue(p1.isComplete());
 			
 		/* p2 is the following proof taken from the online specs:
 		
 		inst.eecs.berkeley.edu/~cs61bl/su13/projects/proj2/SampleProofs/proof05.txt
 		
 		*/
+			TheoremSet proof05 = new TheoremSet();
+			proof05.put("dn", new Expression("(~~a=>a)"));
 			Proof p2 = new Proof(null);
 			p1.extendProof("show (a=>~~a)");
 			p1.extendProof("assume a");
