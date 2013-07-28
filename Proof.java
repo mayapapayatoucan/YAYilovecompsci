@@ -78,7 +78,7 @@ public class Proof {
 			throw new IllegalLineException("You can't assume that.");
 			
 		}
-		lines.put(globalLine(), e);
+		addLine(globalLine(), e);
 
 		increment();
 	}
@@ -86,6 +86,10 @@ public class Proof {
 
 	private void repeat (LineNumber l1, Expression prove) throws IllegalLineException, IllegalInferenceException {
 
+		if (l1.toString().length() > globalLine().toString().length()) {
+			throw new IllegalLineException("Incorrectly referencing line in subproof");
+		}
+		
 		Expression given1 = lookupLine(l1);
 
 		if (given1.equals(prove)) {
@@ -111,6 +115,10 @@ public class Proof {
 
 	private void ic (LineNumber l1, Expression prove) throws IllegalLineException, IllegalInferenceException {
 
+		if (l1.toString().length() > globalLine().toString().length()) {
+			throw new IllegalLineException("Incorrectly referencing line in subproof");
+		}
+		
 		//line reference
 		Expression given1 = lookupLine(l1);
 
@@ -131,6 +139,10 @@ public class Proof {
 
 	private void co (LineNumber l1, LineNumber l2, Expression prove) throws IllegalLineException, IllegalInferenceException {
 
+		if ((l1.toString().length() > globalLine().toString().length()) ||
+				(l2.toString().length() > globalLine().toString().length())) {
+			throw new IllegalLineException("Incorrectly referencing line in subproof");
+		}
 
 		Expression given1 = lookupLine(l1);
 		Expression given2 = lookupLine(l2);
@@ -152,6 +164,10 @@ public class Proof {
 
 	private void mp (LineNumber l1, LineNumber l2, Expression prove) throws IllegalLineException, IllegalInferenceException {
 
+		if ((l1.toString().length() > globalLine().toString().length()) ||
+				(l2.toString().length() > globalLine().toString().length())) {
+			throw new IllegalLineException("Incorrectly referencing line in subproof");
+		}
 
 		Expression given1 = lookupLine(l1);
 		Expression given2 = lookupLine(l2);
@@ -177,6 +193,11 @@ public class Proof {
 
 	private void mt (LineNumber l1, LineNumber l2, Expression prove) throws IllegalLineException, IllegalInferenceException {
 
+		if ((l1.toString().length() > globalLine().toString().length()) ||
+				(l2.toString().length() > globalLine().toString().length())) {
+			throw new IllegalLineException("Incorrectly referencing line in subproof");
+		}
+		
 		Expression given1 = lookupLine(l1);
 		Expression given2 = lookupLine(l2);
 
@@ -229,9 +250,9 @@ public class Proof {
 		subProof.extendProof(x);
 		if (subProof.isComplete()) {
 			//Expression.print(subProof.toBeProved(), "has been proven.");
-			//System.out.println("local line: " + localLine);
+			//System.out.println("global line: " + globalLine());
 			//Expression.print(subProof.toBeProved, "subProof.toBeProved");
-			lines.put(LineNumber.concat(base, localLine), subProof.toBeProved);
+			addLine(globalLine(), subProof.toBeProved);
 			subProof = null;
 			increment();
 		}
@@ -250,7 +271,6 @@ public class Proof {
 	}
 
 	public void extendProof (String x) throws IllegalLineException, IllegalInferenceException {
-		
 		//Separate line by whitespace
 		String[] currline = x.split(" ");
 		if (currline.length == 0) {
@@ -266,9 +286,11 @@ public class Proof {
 
 				throw new IllegalLineException("Print does not take arguments.");
 			}
-
+			
+			// This implementation is less efficient than using allLines instead of toString(), but we were told call toString() here.
+			String[] allLinesArray = toString().split(" / ");
 			System.out.println("");
-			for (String s : allLines) {
+			for (String s : allLinesArray) {
 				System.out.println(s);
 			}
 			System.out.println("");
@@ -288,7 +310,11 @@ public class Proof {
 			}
 
 			show(new Expression(currline[1]));
-			markLine(LineNumber.concat(base, localLine -1), x); 
+			if (subProof == null) {
+				markLine(LineNumber.concat(base, localLine -1), x); 
+			} else {
+				markLine(LineNumber.concat(base, localLine), x);
+			}
 		}
 
 		//ASSUME
@@ -406,7 +432,11 @@ public class Proof {
 	}
 	
 	public String toString ( ) {
-		return "";
+		String output = "";
+		for (String s : allLines) {
+			output = output.concat(s + " / ");
+		}
+		return output;
 	}
 
 	public boolean isComplete ( ) {
